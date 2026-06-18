@@ -1,0 +1,237 @@
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Getränkekasse</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f4f4;
+    margin:0;
+    padding:15px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+#total{
+    font-size:48px;
+    font-weight:bold;
+    margin:20px 0;
+}
+
+.buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+button{
+    padding:20px;
+    font-size:22px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    touch-action:manipulation;
+}
+
+.cocktail{background:black;color:white;}
+.longdrink{background:#2196f3;color:white;}
+.aperitif{background:#9c27b0;color:white;}
+.shot{background:#f44336;color:white;}
+.alkfrei{background:white;color:black;border:2px solid #ccc;}
+.sekt{background:orange;color:white;}
+.pfand{background:#4caf50;color:white;}
+
+.actions{
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+}
+
+.actions button{
+    flex:1;
+}
+
+#circles{
+    margin-top:25px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+}
+
+.circle{
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.label{
+    font-size:12px;
+}
+
+.count{
+    font-size:24px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🍹 Getränkekasse</h1>
+
+<div id="total">0,00 €</div>
+
+<div class="buttons">
+    <button class="cocktail" onclick="add('Cocktail')">Cocktail</button>
+    <button class="longdrink" onclick="add('Longdrink')">Longdrink</button>
+
+    <button class="aperitif" onclick="add('Aperitif')">Aperitif</button>
+    <button class="shot" onclick="add('Shot')">Shot</button>
+
+    <button class="alkfrei" onclick="add('Alkoholfrei')">Alkoholfrei</button>
+    <button class="sekt" onclick="add('Sekt')">Sekt</button>
+
+    <button class="pfand" onclick="add('Pfand')">Becherpfand</button>
+</div>
+
+<div class="actions">
+    <button onclick="undo()">↶ Zurück</button>
+    <button onclick="resetCash()">🗑️ Neue Bestellung</button>
+</div>
+
+<div id="circles"></div>
+
+<script>
+
+const prices = {
+    Cocktail:7,
+    Longdrink:6.5,
+    Aperitif:6,
+    Shot:2,
+    Alkoholfrei:5,
+    Sekt:4,
+    Pfand:-2
+};
+
+const colors = {
+    Cocktail:"black",
+    Longdrink:"#2196f3",
+    Aperitif:"#9c27b0",
+    Shot:"#f44336",
+    Alkoholfrei:"white",
+    Sekt:"orange",
+    Pfand:"#4caf50"
+};
+
+let counts = {};
+let history = [];
+let lastResetState = null;
+
+Object.keys(prices).forEach(x=>counts[x]=0);
+
+function add(item){
+    lastResetState = null;
+    counts[item]++;
+    history.push(item);
+    render();
+}
+
+function remove(item){
+    if(counts[item] > 0){
+        lastResetState = null;
+        counts[item]--;
+        render();
+    }
+}
+
+function undo(){
+    const last = history.pop();
+    if(last){
+        counts[last]--;
+        render();
+        return;
+    }
+
+    if(lastResetState){
+        counts = {...lastResetState.counts};
+        history = [...lastResetState.history];
+        lastResetState = null;
+        render();
+    }
+}
+
+function resetCash(){
+    lastResetState = {
+        counts: {...counts},
+        history: [...history]
+    };
+    Object.keys(counts).forEach(x=>counts[x]=0);
+    history=[];
+    render();
+}
+
+function render(){
+
+    let total = 0;
+
+    Object.keys(counts).forEach(item=>{
+        total += counts[item] * prices[item];
+    });
+
+    document.getElementById("total").innerText =
+        total.toFixed(2).replace(".",",") + " €";
+
+    const circles = document.getElementById("circles");
+    circles.innerHTML = "";
+
+    Object.keys(counts).forEach(item=>{
+
+        const div = document.createElement("div");
+        div.className = "circle";
+
+        div.style.background = colors[item];
+
+        if(item === "Alkoholfrei"){
+            div.style.border = "2px solid black";
+        }
+
+        if(item === "Cocktail" ||
+           item === "Longdrink" ||
+           item === "Aperitif" ||
+           item === "Shot" ||
+           item === "Sekt" ||
+           item === "Pfand"){
+            div.style.color = "white";
+        }
+
+        div.innerHTML = `
+            <div class="count">${counts[item]}</div>
+            <div class="label">${item}</div>
+        `;
+
+        div.onclick = ()=>remove(item);
+
+        circles.appendChild(div);
+    });
+}
+
+render();
+
+</script>
+
+</body>
+</html>
+```
