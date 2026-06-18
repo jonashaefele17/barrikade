@@ -37,6 +37,30 @@ h1{
     gap:10px;
 }
 
+.buttons button{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.btn-count{
+    position:absolute;
+    left:10px;
+    min-width:32px;
+    padding:0;
+    font-weight:bold;
+    opacity:0.7;
+    text-align:center;
+}
+
+.btn-label{
+    width:100%;
+    text-align:center;
+}
+
+.alkfrei .btn-count{ color:rgba(0,0,0,0.65); }
+
 button{
     padding:20px;
     font-size:22px;
@@ -115,8 +139,8 @@ button{
     }
 
     button{
-        padding:14px 10px;
-        min-height:52px;
+        padding:16px 10px;
+        min-height:58px;
         font-size:18px;
         border-radius:10px;
     }
@@ -151,8 +175,8 @@ button{
     }
 
     button{
-        padding:12px 8px;
-        min-height:48px;
+        padding:14px 8px;
+        min-height:54px;
         font-size:16px;
     }
 
@@ -175,21 +199,21 @@ button{
 <div id="total">0,00 €</div>
 
 <div class="buttons">
-    <button class="cocktail" onclick="add('Cocktail')">Cocktail</button>
-    <button class="longdrink" onclick="add('Longdrink')">Longdrink</button>
+    <button class="cocktail" data-item="Cocktail" data-label="Cocktail" onclick="add('Cocktail')">Cocktail</button>
+    <button class="longdrink" data-item="Longdrink" data-label="Longdrink" onclick="add('Longdrink')">Longdrink</button>
 
-    <button class="aperitif" onclick="add('Aperitif')">Aperitif</button>
-    <button class="shot" onclick="add('Shot')">Shot</button>
+    <button class="aperitif" data-item="Aperitif" data-label="Aperitif" onclick="add('Aperitif')">Aperitif</button>
+    <button class="shot" data-item="Shot" data-label="Shot" onclick="add('Shot')">Shot</button>
 
-    <button class="alkfrei" onclick="add('Alkoholfrei')">Alkoholfrei</button>
-    <button class="sekt" onclick="add('Sekt')">Sekt</button>
+    <button class="alkfrei" data-item="Alkoholfrei" data-label="Alkoholfrei" onclick="add('Alkoholfrei')">Alkoholfrei</button>
+    <button class="sekt" data-item="Sekt" data-label="Sekt" onclick="add('Sekt')">Sekt</button>
 
-    <button class="pfand" onclick="add('Pfand')">Becherpfand</button>
+    <button class="pfand" data-item="Pfand" data-label="Becherpfand" onclick="add('Pfand')">Becherpfand</button>
 </div>
 
 <div class="actions">
-    <button onclick="undo()">↶ Zurück</button>
-    <button onclick="resetCash()">🗑️ Neue Bestellung</button>
+    <button onclick="undo()" aria-label="Zurück" title="Zurück">↶</button>
+    <button onclick="resetCash()" aria-label="Neue Bestellung" title="Neue Bestellung">🗑️</button>
 </div>
 
 <div id="circles"></div>
@@ -273,6 +297,15 @@ function render(){
 
     document.getElementById("total").innerText =
         total.toFixed(2).replace(".",",") + " €";
+
+    document.querySelectorAll(".buttons button[data-item]").forEach(button=>{
+        const item = button.dataset.item;
+        const label = button.dataset.label;
+        button.innerHTML = `
+            <span class="btn-count">${counts[item]}</span>
+            <span class="btn-label">${label}</span>
+        `;
+    });
 
     const circles = document.getElementById("circles");
     circles.innerHTML = "";
